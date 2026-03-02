@@ -1,0 +1,1 @@
+/Users/chaitanya/Desktop/videnti-ecw-agent/mcp-servers/search-mcp/server.py

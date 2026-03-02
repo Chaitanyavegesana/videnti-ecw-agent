@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-02-28T21:07:15.250223",
+  "servers": {
+    "ollama": "OFFLINE",
+    "ecw_bridge": "OFFLINE",
+    "search": "OFFLINE"
+  },
+  "dashboard": {
+    "accessible": true
+  },
+  "integration": {}
+}

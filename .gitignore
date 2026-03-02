@@ -1,5 +1,41 @@
 node_modules/
 .DS_Store
-.env
 dist/
 build/
+
+# ── HIPAA: NEVER COMMIT THESE ──────────────────────────────────────────────
+.env                        # Contains eCW credentials and MRN salt
+.videnti_tokens.json        # Approval token store
+.videnti/                   # Local PHI mapping database
+
+# ── Logs (contain snapshot_ids and operational data) ──────────────────────
+logs/
+!logs/.gitkeep
+!logs/screenshots/.gitkeep
+
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+*.egg
+
+# ── Screenshots (may contain PHI if misconfigured) ────────────────────────
+logs/screenshots/*.png
+logs/screenshots/*.jpg
+
+# ── macOS ─────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── IDE ───────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
