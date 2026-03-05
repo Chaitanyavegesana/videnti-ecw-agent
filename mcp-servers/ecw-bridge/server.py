@@ -1,5 +1,5 @@
 """
-Videnti Clinical AI — eCW Bridge MCP Server
+ICS - Intelligent Clinical System — eCW Bridge MCP Server
 FastMCP-based local server for eClinicalWorks RPA via PyAutoGUI.
 
 Endpoint: http://localhost:8001
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 # ─── FastMCP Server Init ─────────────────────────────────────────────────────
 
 mcp = FastMCP(
-    name="videnti-ecw-bridge",
+    name="ics-ecw-bridge",
     instructions="Local eClinicalWorks RPA bridge using PyAutoGUI for EMR automation",
 )
 
@@ -472,7 +472,7 @@ async def save_credentials(
         set_key(str(ENV_PATH), "ECW_MFA_METHOD", ecw_mfa)
         set_key(str(ENV_PATH), "OLLAMA_BASE_URL", ollama_base_url)
         if mrn_salt:
-            set_key(str(ENV_PATH), "VIDENTI_MRN_SALT", mrn_salt)
+            set_key(str(ENV_PATH), "ICS_MRN_SALT", mrn_salt)
 
         logger.info("Credentials saved to local .env (NOT transmitted externally)")
         return {"status": "SUCCESS", "message": "Credentials saved to local .env file.", "env_path": str(ENV_PATH)}
@@ -484,7 +484,7 @@ async def save_credentials(
 if __name__ == "__main__":
     import uvicorn
     
-    logger.info(f"Starting Videnti eCW Bridge MCP Server on port {SERVER_PORT}")
+    logger.info(f"Starting ICS eCW Bridge MCP Server on port {SERVER_PORT}")
     
     # Create ASGI app from FastMCP server
     app = mcp.asgi()

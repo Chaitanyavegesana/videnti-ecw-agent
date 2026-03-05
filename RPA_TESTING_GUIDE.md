@@ -1,8 +1,8 @@
-# RPA Testing Guide — eCW Bridge PyAutoGUI Automation
+# ICS - RPA Testing Guide — eCW Bridge PyAutoGUI Automation
 
 ## Overview
 
-The Videnti eCW Bridge uses **PyAutoGUI** to automate screen interactions with eClinicalWorks (RPA = Robotic Process Automation). This guide shows you how to test this functionality safely.
+The ICS - Intelligent Clinical System eCW Bridge uses **PyAutoGUI** to automate screen interactions with eClinicalWorks (RPA = Robotic Process Automation). This guide shows you how to test this functionality safely.
 
 ---
 
@@ -317,4 +317,4 @@ Check `/Users/chaitanya/Desktop/videnti-ecw-agent/logs/` for detailed logs.
 
 ---
 
-**Happy RPA Testing! ��**
+**Happy ICS RPA Testing! 🚀**

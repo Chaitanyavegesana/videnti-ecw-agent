@@ -1,4 +1,4 @@
-# RPA Flow Test Guide: Complete Step-by-Step
+# ICS - RPA Flow Test Guide: Complete Step-by-Step
 
 **What You'll See:** A real demonstration of PyAutoGUI automation
 
@@ -17,7 +17,7 @@ cd /Users/chaitanya/Desktop/videnti-ecw-agent
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     RPA FLOW - 5 PHASES                          │
+│           ICS - RPA FLOW - 5 PHASES                              │
 └─────────────────────────────────────────────────────────────────┘
 
 PHASE 1: NAVIGATE
@@ -181,7 +181,7 @@ All actions logged:
 You'll see:
 ```
 ╔════════════════════════════════════════════════════════════════╗
-║                   RPA TESTING - GETTING STARTED                ║
+║              ICS - RPA TESTING - GETTING STARTED               ║
 ║                                                                ║
 ║  Prerequisites:                                                ║
 ║  1. Have a browser open (Chrome or Firefox)                    ║
@@ -400,7 +400,7 @@ Apply same technique to actual eCW instance:
 3. Test with real eCW credentials
 
 ### **Option 2: Test Full Pipeline**
-Run the complete Videnti system:
+Run the complete ICS system:
 ```bash
 # Start all servers
 .venv/bin/python mcp_servers/ecw_bridge/server.py &
@@ -408,7 +408,7 @@ Run the complete Videnti system:
 .venv/bin/python mcp_servers/search_mcp/server.py &
 
 # Run orchestrator
-VIDENTI_TEST_RUN=1 .venv/bin/python main.py
+ICS_TEST_RUN=1 .venv/bin/python main.py
 ```
 
 ### **Option 3: Advanced RPA**

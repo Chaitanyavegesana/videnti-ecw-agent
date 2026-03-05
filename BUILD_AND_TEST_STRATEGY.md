@@ -1,8 +1,8 @@
-# Videnti ECW Agent: Build & Test Strategy
+# ICS - Intelligent Clinical System: Build & Test Strategy
 **Last Updated:** February 28, 2026
 
 ## Overview
-This document outlines a phased approach to building Videnti, with each phase being **independently testable** before moving to the next.
+This document outlines a phased approach to building ICS, with each phase being **independently testable** before moving to the next.
 
 ---
 
@@ -72,12 +72,12 @@ Each server responds to HTTP requests without errors.
   - Verify response handling for each server
 
 - [ ] **Task 3.2**: Test end-to-end pipeline with mocked services
-  - Run `VIDENTI_TEST_RUN=1 python main.py`
+  - Run `ICS_TEST_RUN=1 python main.py`
   - Verify all steps execute without errors
 
 ### Run Command
 ```bash
-VIDENTI_TEST_RUN=1 python main.py
+ICS_TEST_RUN=1 python main.py
 ```
 
 ### Expected Status
@@ -206,7 +206,7 @@ pytest tests/ -v -m "not integration"
 - [ ] All endpoints respond to HTTP requests
 
 ### Phase 3: Orchestrator Tests
-- [ ] `VIDENTI_TEST_RUN=1 python main.py` completes without error
+- [ ] `ICS_TEST_RUN=1 python main.py` completes without error
 - [ ] All three servers are called
 - [ ] Results are logged
 

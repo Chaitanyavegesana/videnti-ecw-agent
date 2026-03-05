@@ -3,7 +3,7 @@ RPA DEMO: Visual Guide to PyAutoGUI Automation
 ===============================================
 
 This demonstrates the complete RPA flow with visual examples.
-Shows how the Videnti system automates eCW chart interactions.
+Shows how the ICS system automates eCW chart interactions.
 """
 
 import pyautogui
@@ -257,7 +257,7 @@ def demo_3_real_code_examples():
     ║        DEMO 3: REAL PYAUTOGUI CODE EXAMPLES                    ║
     ╚════════════════════════════════════════════════════════════════╝
     
-    Here are the actual Python commands used in Videnti:
+    Here are the actual Python commands used in ICS:
     
     
     EXAMPLE 1: OPENING A PATIENT CHART

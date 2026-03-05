@@ -1,5 +1,5 @@
 """
-Videnti Clinical AI — Main Orchestrator
+ICS - Intelligent Clinical System — Main Orchestrator
 Core pipeline for eCW schedule scanning and eligibility validation.
 
 This script manages the daily schedule and coordinates between local MCP servers.
@@ -49,7 +49,7 @@ async def call_mcp_tool(server: str, tool: str, params: Dict[str, Any]) -> Dict[
 
 # ─── Core Functional Pipeline ───────────────────────────────────────────────
 
-async def run_videnti_pipeline():
+async def run_ics_pipeline():
     """
     Main clinical AI pipeline:
     1. Scan schedule.
@@ -57,7 +57,7 @@ async def run_videnti_pipeline():
     3. Anonymized logic via Ollama.
     4. Flag recommendations.
     """
-    logger.info("━━━ Starting Videnti Daily Pipeline ━━━")
+    logger.info("━━━ Starting ICS Daily Pipeline ━━━")
     
     # Step 1: Fetch provider schedule (Mocking appointment retrieval for demo)
     # real app would call ecw_bridge.get_schedule()
@@ -104,7 +104,7 @@ def start_scheduler():
     
     # Daily Clinical Pipeline at 7:30 AM
     scheduler.add_job(
-        run_videnti_pipeline, 
+        run_ics_pipeline, 
         'cron', 
         hour=7, 
         minute=30,
@@ -132,11 +132,11 @@ if __name__ == "__main__":
     # Start scheduler in the background
     start_scheduler()
     
-    # For testing: Run once immediately if VIDENTI_TEST_RUN is set
-    if os.environ.get("VIDENTI_TEST_RUN") == "1":
-        loop.create_task(run_videnti_pipeline())
+    # For testing: Run once immediately if ICS_TEST_RUN is set
+    if os.environ.get("ICS_TEST_RUN") == "1":
+        loop.create_task(run_ics_pipeline())
         
     try:
         loop.run_forever()
     except (KeyboardInterrupt, SystemExit):
-        logger.info("Videnti Orchestrator shutting down.")
+        logger.info("ICS Orchestrator shutting down.")

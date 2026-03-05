@@ -1,5 +1,5 @@
 """
-Videnti Clinical AI — Ollama MCP Server
+ICS - Intelligent Clinical System — Ollama MCP Server
 FastMCP-based local server exposing Ollama inference to the agent.
 
 Endpoint: http://localhost:8000
@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 # ─── FastMCP Server Init ──────────────────────────────────────────────────────
 
 mcp = FastMCP(
-    name="videnti-ollama-mcp",
+    name="ics-ollama-mcp",
     instructions="Local Ollama inference bridge for PHI anonymization and clinical reasoning",
 )
 

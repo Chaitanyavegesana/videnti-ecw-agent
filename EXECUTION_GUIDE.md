@@ -1,4 +1,4 @@
-# Videnti ECW Agent: Final Status Report & Execution Guide
+# ICS - Intelligent Clinical System: Final Status Report & Execution Guide
 
 **Date:** February 28, 2026
 **Project Status:** ✅ **COMPLETE & FULLY OPERATIONAL**
@@ -98,7 +98,7 @@ cd /Users/chaitanya/Desktop/videnti-ecw-agent
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    VIDENTI COMPLETE WORKFLOW                     │
+│              ICS - INTELLIGENT CLINICAL SYSTEM WORKFLOW          │
 └─────────────────────────────────────────────────────────────────┘
 
 AUTOMATED (7:30 AM Daily):
@@ -257,7 +257,7 @@ Run these to verify everything works:
 # Expected: 28 passed in 0.68s
 
 # 2. Orchestrator (Mock Run)
-VIDENTI_TEST_RUN=1 .venv/bin/python main.py
+ICS_TEST_RUN=1 .venv/bin/python main.py
 # Expected: Pipeline completed successfully
 
 # 3. Dashboard
@@ -361,7 +361,7 @@ ollama serve
 .venv/bin/python mcp_servers/search_mcp/server.py &
 
 # Terminal 4
-VIDENTI_TEST_RUN=1 .venv/bin/python main.py
+ICS_TEST_RUN=1 .venv/bin/python main.py
 
 # All servers working together
 ```

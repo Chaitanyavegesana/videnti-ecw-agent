@@ -273,12 +273,13 @@ def run_complete_rpa_flow():
     5. Verify results
     """
     logger.info("\n" + "="*70)
-    logger.info("VIDENTI RPA FLOW TEST - COMPLETE DEMONSTRATION")
+    logger.info("ICS RPA FLOW TEST - COMPLETE DEMONSTRATION")
     logger.info("="*70)
     
     print("""
     ╔════════════════════════════════════════════════════════════════╗
-    ║         VIDENTI RPA FLOW - COMPLETE TEST DEMONSTRATION         ║
+    ║    ICS - Intelligent Clinical System RPA FLOW - COMPLETE       ║
+    ║                  TEST DEMONSTRATION                            ║
     ║                                                                ║
     ║  We'll test the complete RPA flow using a practice website:   ║
     ║  https://practicetestautomation.com/practice-test-login/     ║
@@ -350,7 +351,7 @@ if __name__ == "__main__":
     
     print("""
     ╔════════════════════════════════════════════════════════════════╗
-    ║                   RPA TESTING - GETTING STARTED                ║
+    ║               ICS - RPA TESTING - GETTING STARTED              ║
     ║                                                                ║
     ║  This script demonstrates PyAutoGUI automation on a sample     ║
     ║  website. You'll learn how the eCW RPA flow works.             ║

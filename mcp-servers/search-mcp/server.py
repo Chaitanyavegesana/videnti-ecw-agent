@@ -1,5 +1,5 @@
 """
-Videnti Clinical AI — Search MCP Server
+ICS - Intelligent Clinical System — Search MCP Server
 FastMCP-based local server for GitHub scanning and guideline lookups.
 
 Endpoint: http://localhost:8002
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # ─── FastMCP Server Init ─────────────────────────────────────────────────────
 
 mcp = FastMCP(
-    name="videnti-search-mcp",
+    name="ics-search-mcp",
     instructions="Medical coding repository and guideline search server",
 )
 
@@ -90,5 +90,5 @@ async def fetch_medical_guidelines(topic: str) -> Dict[str, Any]:
     return {"topic": topic, "guidelines": result}
 
 if __name__ == "__main__":
-    logger.info(f"Starting Videnti Search MCP Server on port {SERVER_PORT}")
+    logger.info(f"Starting ICS Search MCP Server on port {SERVER_PORT}")
     mcp.run(transport="streamable-http", host="localhost", port=SERVER_PORT)
