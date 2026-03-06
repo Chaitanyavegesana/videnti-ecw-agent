@@ -263,7 +263,7 @@ async def test_save_credentials_writes_env(tmp_path, monkeypatch):
     env_content = test_env.read_text()
     assert "ECW_URL" in env_content
     assert "ECW_USERNAME" in env_content
-    assert "VIDENTI_MRN_SALT" in env_content
+    assert "ICS_MRN_SALT" in env_content
     print("✓ save_credentials correctly wrote all keys to .env")
 
 

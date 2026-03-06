@@ -162,15 +162,15 @@ async def test_call_mcp_tool_handles_http_errors(mock_http_client):
         print(f"✓ call_mcp_tool correctly handled connection error")
 
 
-# ── Integration Tests for run_videnti_pipeline ───────────────────────────
+# ── Integration Tests for run_ics_pipeline ───────────────────────────
 
 @pytest.mark.asyncio
 async def test_run_videnti_pipeline_processes_appointments(mock_http_client, mock_mcp_responses):
     """
-    Test that run_videnti_pipeline successfully processes a mock appointment
+    Test that run_ics_pipeline successfully processes a mock appointment
     by calling all three MCP servers in the correct sequence.
     """
-    from main import run_videnti_pipeline
+    from main import run_ics_pipeline
     
     with patch('httpx.AsyncClient') as mock_client_class:
         mock_client_instance = AsyncMock()
@@ -179,11 +179,11 @@ async def test_run_videnti_pipeline_processes_appointments(mock_http_client, moc
         mock_client_instance.post = AsyncMock(side_effect=mock_http_client)
         
         # Run the pipeline
-        await run_videnti_pipeline()
+        await run_ics_pipeline()
         
         # Verify that HTTP calls were made
         assert mock_client_instance.post.called, "Should have made HTTP calls"
-        print(f"✓ run_videnti_pipeline executed without errors ({mock_client_instance.post.call_count} calls made)")
+        print(f"✓ run_ics_pipeline executed without errors ({mock_client_instance.post.call_count} calls made)")
 
 
 @pytest.mark.asyncio
@@ -192,7 +192,7 @@ async def test_run_videnti_pipeline_calls_all_servers(mock_http_client):
     Verify that the pipeline calls ecw_bridge, ollama, and search servers
     in the correct order.
     """
-    from main import run_videnti_pipeline
+    from main import run_ics_pipeline
     
     call_sequence = []
     
@@ -212,12 +212,12 @@ async def test_run_videnti_pipeline_calls_all_servers(mock_http_client):
         mock_client_class.return_value.__aenter__.return_value = mock_client_instance
         mock_client_instance.post = tracking_post
         
-        await run_videnti_pipeline()
+        await run_ics_pipeline()
         
         # Verify servers were called (order may vary due to async execution)
         assert "ecw_bridge" in call_sequence, "eCW Bridge should be called"
         assert "ollama" in call_sequence, "Ollama should be called"
-        print(f"✓ run_videnti_pipeline called all expected servers: {set(call_sequence)}")
+        print(f"✓ run_ics_pipeline called all expected servers: {set(call_sequence)}")
 
 
 # ── Test for weekly_research_sync ───────────────────────────────────────
@@ -321,10 +321,10 @@ def test_scheduler_is_configured():
     scheduler = AsyncIOScheduler()
     
     # Add the same jobs as in main.py
-    from main import run_videnti_pipeline, weekly_research_sync
+    from main import run_ics_pipeline, weekly_research_sync
     
     scheduler.add_job(
-        run_videnti_pipeline,
+        run_ics_pipeline,
         'cron',
         hour=7,
         minute=30,
