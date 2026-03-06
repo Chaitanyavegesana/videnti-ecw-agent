@@ -1,0 +1,80 @@
+.login-status-banner {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideDown 0.3s ease-out;
+  font-family: inherit;
+}
+
+.login-status-banner.banner-success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.login-status-banner.banner-warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+  animation: slideDown 0.3s ease-out, pulse 1.5s infinite;
+}
+
+.banner-content {
+  flex: 1;
+}
+
+.banner-content strong {
+  font-weight: 700;
+  display: block;
+  font-size: 1.05rem;
+}
+
+.banner-content p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.85rem;
+}
+
+.banner-button {
+  padding: 0.5rem 1rem;
+  background-color: #1b6e3e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+  margin-left: 1rem;
+  white-space: nowrap;
+}
+
+.banner-button:hover:not(:disabled) {
+  background-color: #025a3b;
+}
+
+.banner-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}

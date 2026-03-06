@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SettingsPage from './SettingsPage';
 import AuditLogPage from './AuditLogPage';
+import LoginStatusBanner from './LoginStatusBanner';
 
 // ─── Mock Data ──────────────────────────────────────────────────────────────
 
@@ -137,6 +138,8 @@ function App() {
             </button>
           </div>
         </header>
+
+        <LoginStatusBanner />
 
         {activeTab === 'activity' && <AuditLogPage />}
         {activeTab === 'settings' && <SettingsPage />}
