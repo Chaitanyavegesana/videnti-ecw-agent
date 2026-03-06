@@ -1,3 +1,3 @@
-# Videnti ECW Agent
+# ICS ECW Agent
 
-Videnti eCW (eClinicalWorks) Agent project.
+Intelligent Clinical System  eCW (eClinicalWorks) Agent project.
