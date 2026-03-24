@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "Videnti eCW Bridge",
+  "version": "1.0.0",
+  "description": "HIPAA-compliant DOM extraction bridge for eClinicalWorks — connects to the local Videnti ICS agent.",
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "alarms"
+  ],
+
+  "host_permissions": [
+    "https://*.ecwcloud.com/*",
+    "https://*.eclinicalworks.com/*",
+    "http://localhost:8001/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.ecwcloud.com/*",
+        "https://*.eclinicalworks.com/*"
+      ],
+      "js": ["content_script.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Videnti eCW Bridge",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

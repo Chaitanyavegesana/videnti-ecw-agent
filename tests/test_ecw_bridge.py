@@ -52,18 +52,19 @@ async def test_get_schedule_with_date(monkeypatch):
 async def test_open_chart_with_valid_mrn(monkeypatch):
     """open_chart should successfully open a patient chart for a valid MRN."""
     from mcp_servers.ecw_bridge.server import open_chart
-    
-    # Mock pyautogui to avoid screen interaction
-    import pyautogui
-    monkeypatch.setattr(pyautogui, "hotkey", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "write", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "press", lambda *a, **kw: None)
-    
+    from unittest.mock import MagicMock
+    import sys
+
+    # Mock pyautogui via sys.modules so the lazy import inside open_chart
+    # gets the mock without needing a real display.
+    mock_pag = MagicMock()
+    monkeypatch.setitem(sys.modules, "pyautogui", mock_pag)
+
     import time
     monkeypatch.setattr(time, "sleep", lambda *a: None)
 
     result = await open_chart("MRN-123456")
-    
+
     assert result.get("status") == "SUCCESS"
     assert result.get("patient_mrn") == "MRN-123456"
     assert "message" in result
@@ -74,17 +75,17 @@ async def test_open_chart_with_valid_mrn(monkeypatch):
 async def test_open_chart_handles_empty_mrn(monkeypatch):
     """open_chart should handle empty MRN gracefully."""
     from mcp_servers.ecw_bridge.server import open_chart
-    
-    import pyautogui
-    monkeypatch.setattr(pyautogui, "hotkey", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "write", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "press", lambda *a, **kw: None)
-    
+    from unittest.mock import MagicMock
+    import sys
+
+    mock_pag = MagicMock()
+    monkeypatch.setitem(sys.modules, "pyautogui", mock_pag)
+
     import time
     monkeypatch.setattr(time, "sleep", lambda *a: None)
 
     result = await open_chart("")
-    
+
     # Should still succeed as open_chart doesn't validate - it just types what's given
     assert "status" in result
     print(f"✓ open_chart handled empty MRN")
@@ -152,20 +153,28 @@ async def test_extract_chart_data_has_realistic_values(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_extract_chart_data_caches_data(monkeypatch):
-    """extract_chart_data should cache the extracted data for later use."""
+    """extract_chart_data should cache the encrypted snapshot for later use."""
     from mcp_servers.ecw_bridge.server import extract_chart_data, CHART_DATA_CACHE
-    
+
     # Clear cache first
     CHART_DATA_CACHE.clear()
 
     result = await extract_chart_data("MRN-CACHE-TEST")
-    
-    # Verify data is in cache
+
+    # Verify an entry exists in the cache for this MRN
     assert "MRN-CACHE-TEST" in CHART_DATA_CACHE
-    cached = CHART_DATA_CACHE["MRN-CACHE-TEST"]
-    assert cached["demographics"]["mrn"] == "MRN-CACHE-TEST"
-    
-    print(f"✓ extract_chart_data cached data for later use")
+    # Cache now stores (encrypted_token, timestamp) tuples
+    cached_entry = CHART_DATA_CACHE["MRN-CACHE-TEST"]
+    assert isinstance(cached_entry, tuple) and len(cached_entry) == 2
+    cached_token, cached_ts = cached_entry
+    assert isinstance(cached_token, str)
+    assert len(cached_token) > 0
+
+    # The raw_data returned in the response should still have demographics
+    raw_data = result.get("raw_data", {})
+    assert raw_data.get("demographics", {}).get("mrn") == "MRN-CACHE-TEST"
+
+    print(f"✓ extract_chart_data cached encrypted snapshot for later use")
 
 
 # ── Unit Tests: Order Placement ──────────────────────────────────────────────
@@ -184,11 +193,11 @@ async def test_pend_order_rejects_invalid_token(monkeypatch):
 async def test_pend_order_accepts_valid_token(monkeypatch):
     """pend_order should place order with a valid approval token."""
     from mcp_servers.ecw_bridge.server import pend_order
+    from unittest.mock import MagicMock
+    import sys
 
-    # Mock pyautogui
-    import pyautogui
-    monkeypatch.setattr(pyautogui, "write", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "press", lambda *a, **kw: None)
+    mock_pag = MagicMock()
+    monkeypatch.setitem(sys.modules, "pyautogui", mock_pag)
 
     import time
     monkeypatch.setattr(time, "sleep", lambda *a: None)
@@ -203,17 +212,18 @@ async def test_pend_order_accepts_valid_token(monkeypatch):
 async def test_pend_order_with_home_sleep_test(monkeypatch):
     """pend_order should successfully place a Home Sleep Test order."""
     from mcp_servers.ecw_bridge.server import pend_order
+    from unittest.mock import MagicMock
+    import sys
 
-    import pyautogui
-    monkeypatch.setattr(pyautogui, "write", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "press", lambda *a, **kw: None)
+    mock_pag = MagicMock()
+    monkeypatch.setitem(sys.modules, "pyautogui", mock_pag)
 
     import time
     monkeypatch.setattr(time, "sleep", lambda *a: None)
 
     # Home Sleep Test: CPT 95800, ICD-10 G47.33 (Sleep Apnea)
     result = await pend_order("95800", "G47.33", "MRN-123456", "approval-token-valid")
-    
+
     assert result["status"] == "SUCCESS"
     assert result["order_details"]["cpt"] == "95800"
     assert result["order_details"]["icd"] == "G47.33"
@@ -224,10 +234,11 @@ async def test_pend_order_with_home_sleep_test(monkeypatch):
 async def test_pend_order_with_eeg(monkeypatch):
     """pend_order should successfully place an EEG order."""
     from mcp_servers.ecw_bridge.server import pend_order
+    from unittest.mock import MagicMock
+    import sys
 
-    import pyautogui
-    monkeypatch.setattr(pyautogui, "write", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "press", lambda *a, **kw: None)
+    mock_pag = MagicMock()
+    monkeypatch.setitem(sys.modules, "pyautogui", mock_pag)
 
     import time
     monkeypatch.setattr(time, "sleep", lambda *a: None)
@@ -281,43 +292,47 @@ async def test_complete_rpa_flow_get_schedule_to_extract_data(monkeypatch):
     from mcp_servers.ecw_bridge.server import (
         get_schedule, open_chart, extract_chart_data, CHART_DATA_CACHE
     )
-    
-    import pyautogui
-    monkeypatch.setattr(pyautogui, "hotkey", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "write", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "press", lambda *a, **kw: None)
-    
+    from unittest.mock import MagicMock
+    import sys
+
+    mock_pag = MagicMock()
+    monkeypatch.setitem(sys.modules, "pyautogui", mock_pag)
+
     import time
     monkeypatch.setattr(time, "sleep", lambda *a: None)
-    
+
     CHART_DATA_CACHE.clear()
-    
+
     # STEP 1: Get schedule
     schedule = await get_schedule()
     assert schedule["status"] == "SUCCESS"
     assert len(schedule["appointments"]) > 0
     print(f"✓ Step 1: Retrieved {len(schedule['appointments'])} appointments")
-    
+
     # STEP 2: Open chart for first patient
     first_mrn = schedule["appointments"][0]["patient_mrn"]
     open_result = await open_chart(first_mrn)
     assert open_result["status"] == "SUCCESS"
     print(f"✓ Step 2: Opened chart for {first_mrn}")
-    
+
     # STEP 3: Extract data from chart
     extract_result = await extract_chart_data(first_mrn)
     assert extract_result["status"] == "SUCCESS"
     raw_data = extract_result["raw_data"]
     print(f"✓ Step 3: Extracted {len(raw_data)} clinical fields")
-    
-    # STEP 4: Verify data is cached and ready for next step
+
+    # STEP 4: Verify data is cached (as an encrypted token tuple) and raw_data is valid
     assert first_mrn in CHART_DATA_CACHE
-    cached_data = CHART_DATA_CACHE[first_mrn]
-    assert "demographics" in cached_data
-    assert "vitals" in cached_data
-    assert cached_data["vitals"]["bmi"] > 0
-    print(f"✓ Step 4: Data cached and ready for Ollama anonymization")
-    
+    cached_entry = CHART_DATA_CACHE[first_mrn]
+    assert isinstance(cached_entry, tuple) and len(cached_entry) == 2
+    cached_token, _ = cached_entry
+    assert isinstance(cached_token, str) and len(cached_token) > 0
+    # Validate raw_data (returned in response) contains expected fields
+    assert "demographics" in raw_data
+    assert "vitals" in raw_data
+    assert raw_data["vitals"]["bmi"] > 0
+    print(f"✓ Step 4: Encrypted token cached; raw_data ready for Ollama anonymization")
+
     print(f"\n✓ Complete RPA flow succeeded: schedule → open_chart → extract_data → cache")
 
 
@@ -366,11 +381,12 @@ async def test_rpa_flow_complete_approval_workflow(monkeypatch):
     from mcp_servers.ecw_bridge.server import (
         extract_chart_data, approve_recommendation, pend_order
     )
-    
-    import pyautogui
-    monkeypatch.setattr(pyautogui, "write", lambda *a, **kw: None)
-    monkeypatch.setattr(pyautogui, "press", lambda *a, **kw: None)
-    
+    from unittest.mock import MagicMock
+    import sys
+
+    mock_pag = MagicMock()
+    monkeypatch.setitem(sys.modules, "pyautogui", mock_pag)
+
     import time
     monkeypatch.setattr(time, "sleep", lambda *a: None)
     

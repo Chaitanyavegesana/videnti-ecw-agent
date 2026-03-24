@@ -4,9 +4,12 @@ dist/
 build/
 
 # ── HIPAA: NEVER COMMIT THESE ──────────────────────────────────────────────
-.env                        # Contains eCW credentials and MRN salt
-.videnti_tokens.json        # Approval token store
-.videnti/                   # Local PHI mapping database
+# Contains eCW credentials and MRN salt
+.env
+# Approval token store
+.videnti_tokens.json
+# Local PHI mapping database
+.videnti/
 
 # ── Logs (contain snapshot_ids and operational data) ──────────────────────
 logs/

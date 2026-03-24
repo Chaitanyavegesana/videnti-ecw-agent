@@ -1,15 +1,17 @@
 """
 Visual Driver - RPA Automation with Calibrated Coordinates
 Uses PyAutoGUI and anchor images to perform OS-level UI automation.
+
+PyAutoGUI is imported lazily inside functions that require a display so
+that this module can be imported in headless/test environments without a
+``$DISPLAY`` variable.
 """
 
 import json
 import logging
 import time
 from pathlib import Path
-from typing import Dict, Tuple, Optional
-
-import pyautogui as pag
+from typing import Dict, Optional, Tuple
 
 from ecw_login import login_to_ecw, is_already_logged_in
 from session_monitor import check_session_alive, get_session_debug_info
@@ -83,18 +85,20 @@ def ensure_logged_in() -> bool:
 
 def navigate_to_schedule(anchor_coords: Optional[Dict] = None) -> bool:
     """Navigate to Schedule view using visual coordinates."""
+    import pyautogui as pag  # lazy import — requires $DISPLAY
+    pag.FAILSAFE = True
+    pag.PAUSE = 0.5
+
     if anchor_coords is None:
         anchor_coords = load_anchor_map()
 
     try:
-        # Move mouse to Schedule button location
         schedule_x, schedule_y = anchor_coords.get("schedule_button", (850, 350))
         logger.info(f"Moving to schedule button: ({schedule_x}, {schedule_y})")
 
         pag.moveTo(schedule_x, schedule_y, duration=0.5)
         time.sleep(0.3)
 
-        # Click
         pag.click()
         time.sleep(2)
 
@@ -108,6 +112,8 @@ def navigate_to_schedule(anchor_coords: Optional[Dict] = None) -> bool:
 
 def get_schedule_snapshot() -> Optional[str]:
     """Capture current schedule view and save screenshot."""
+    import pyautogui as pag  # lazy import — requires $DISPLAY
+
     try:
         timestamp = int(time.time())
         screenshot_path = Path(__file__).parent / "logs" / "screenshots" / f"schedule_{timestamp}.png"

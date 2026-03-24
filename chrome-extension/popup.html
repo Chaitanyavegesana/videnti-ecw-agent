@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Videnti eCW Bridge</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      width: 320px;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    header span.version {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .badge.connected { background: #14532d; color: #86efac; }
+    .badge.connected .dot { background: #22c55e; animation: pulse 1.5s infinite; }
+    .badge.disconnected { background: #450a0a; color: #fca5a5; }
+    .badge.disconnected .dot { background: #ef4444; }
+    .badge.error { background: #451a03; color: #fed7aa; }
+    .badge.error .dot { background: #f97316; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Info rows */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .info-card {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .info-card .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .info-card .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: opacity 0.15s;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:not(:disabled):hover { background: #2563eb; }
+    .btn-secondary { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+    .btn-secondary:not(:disabled):hover { background: #334155; }
+
+    /* Log */
+    #log {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #94a3b8;
+      max-height: 120px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    .log-entry { margin-bottom: 2px; }
+    .log-entry.ok { color: #86efac; }
+    .log-entry.err { color: #fca5a5; }
+    .log-entry.info { color: #93c5fd; }
+
+    footer {
+      margin-top: 12px;
+      font-size: 10px;
+      color: #475569;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Videnti eCW Bridge</h1>
+    <span class="version">v1.0</span>
+  </header>
+
+  <div id="statusBadge" class="badge disconnected">
+    <span class="dot"></span>
+    <span id="statusText">Disconnected</span>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="label">Frame Type</div>
+      <div class="value" id="frameType">—</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Backend</div>
+      <div class="value" id="backendPort">:8001</div>
+    </div>
+  </div>
+
+  <button id="btnExtractChart" class="btn btn-primary" disabled>
+    📋 Extract Chart Data
+  </button>
+  <button id="btnExtractSchedule" class="btn btn-secondary" disabled>
+    📅 Extract Schedule
+  </button>
+
+  <div id="log"></div>
+
+  <footer>PHI stays on this machine · HIPAA Safe-Harbor</footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
