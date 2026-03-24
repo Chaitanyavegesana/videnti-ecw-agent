@@ -135,9 +135,40 @@ def _audit(action: str, details: Dict[str, Any]) -> None:
 
 # ─── Helper: Chart Data Cache ───────────────────────────────────────────────
 
-# In-memory cache: MRN → encrypted ciphertext token
+# In-memory cache: MRN → (encrypted ciphertext token, unix timestamp)
 # Raw PHI is never stored; only the AES-256-GCM encrypted form lives here.
-CHART_DATA_CACHE: Dict[str, str] = {}
+# Entries expire after CACHE_TTL_SECONDS to limit PHI persistence.
+CHART_DATA_CACHE: Dict[str, tuple] = {}  # {mrn: (token, inserted_at)}
+_CACHE_TTL_SECONDS = 3600   # 1 hour — enough for a clinical session
+_CACHE_MAX_ENTRIES = 200    # Guard against unbounded growth
+
+
+def _cache_put(mrn: str, token: str) -> None:
+    """Stores an encrypted token in the cache, enforcing size and TTL limits."""
+    import time as _time
+    # Evict expired entries first
+    now = _time.time()
+    expired = [k for k, (_, ts) in CHART_DATA_CACHE.items() if now - ts > _CACHE_TTL_SECONDS]
+    for k in expired:
+        del CHART_DATA_CACHE[k]
+    # Enforce hard maximum — drop oldest entry if needed
+    if len(CHART_DATA_CACHE) >= _CACHE_MAX_ENTRIES:
+        oldest = min(CHART_DATA_CACHE, key=lambda k: CHART_DATA_CACHE[k][1])
+        del CHART_DATA_CACHE[oldest]
+    CHART_DATA_CACHE[mrn] = (token, now)
+
+
+def _cache_get(mrn: str) -> Optional[str]:
+    """Returns the cached encrypted token for *mrn* if present and not expired."""
+    import time as _time
+    entry = CHART_DATA_CACHE.get(mrn)
+    if entry is None:
+        return None
+    token, inserted_at = entry
+    if _time.time() - inserted_at > _CACHE_TTL_SECONDS:
+        del CHART_DATA_CACHE[mrn]
+        return None
+    return token
 
 # ─── MCP Tools ───────────────────────────────────────────────────────────────
 
@@ -373,11 +404,11 @@ async def extract_chart_data(patient_mrn: str) -> Dict[str, Any]:
 
     # ── Encrypt & cache ───────────────────────────────────────────────────────
     try:
-        CHART_DATA_CACHE[patient_mrn] = _encrypt_snapshot(extracted_data)
+        _cache_put(patient_mrn, _encrypt_snapshot(extracted_data))
         logger.info(f"Encrypted chart data cached for {patient_mrn}")
     except Exception as enc_err:
         logger.warning(f"Cache encryption failed ({enc_err}); storing without encryption")
-        CHART_DATA_CACHE[patient_mrn] = json.dumps(extracted_data)
+        _cache_put(patient_mrn, json.dumps(extracted_data))
 
     _audit("extract_chart_data", {"source": source, "mrn": patient_mrn})
 
@@ -632,8 +663,11 @@ def build_app():
     Constructs the combined ASGI application:
       - FastMCP on all routes
       - WebSocket endpoint at /ws/extension for Chrome Extension
+      - HTTP endpoints for dashboard session status polling
     """
     from starlette.applications import Starlette
+    from starlette.middleware.cors import CORSMiddleware
+    from starlette.responses import JSONResponse
     from starlette.routing import Route, WebSocketRoute
     from starlette.websockets import WebSocket
 
@@ -644,20 +678,70 @@ def build_app():
         await _extension_ws_handler(websocket)
 
     async def health(request):
-        from starlette.responses import JSONResponse
         return JSONResponse({
             "status": "ok",
             "extension_connected": is_extension_connected(),
             "active_connections": len(_extension_connections),
         })
 
-    return Starlette(
+    async def login_status(request):
+        """
+        Polled by LoginStatusBanner.jsx every 10 seconds.
+        Returns the current eCW session state.
+        """
+        from session_monitor import SESSION_STATE, check_session_alive  # type: ignore
+        try:
+            is_active = check_session_alive()
+        except Exception:
+            is_active = SESSION_STATE.get("is_active", False)
+
+        return JSONResponse({
+            "is_active": is_active,
+            "login_time": SESSION_STATE.get("login_time"),
+            "last_verified": SESSION_STATE.get("last_verified"),
+            "extension_connected": is_extension_connected(),
+        })
+
+    async def login_complete(request):
+        """
+        Called by the dashboard when the user manually confirms login.
+        Marks the session as active in session_monitor.SESSION_STATE.
+        """
+        from session_monitor import mark_login_complete, SESSION_STATE  # type: ignore
+        try:
+            mark_login_complete()
+            is_active = SESSION_STATE.get("is_active", True)
+        except Exception:
+            is_active = True  # Optimistically mark active if module unavailable
+
+        _audit("login_complete", {"source": "dashboard_confirmation"})
+        return JSONResponse({
+            "is_active": is_active,
+            "message": "Session marked as active",
+        })
+
+    async def session_check(request):
+        """Quick liveness check used by health_check.py."""
+        return JSONResponse({"status": "ok", "session_endpoint": "ready"})
+
+    app = Starlette(
         routes=[
-            Route("/health", health),
+            Route("/health",         health),
+            Route("/login-status",   login_status),
+            Route("/login-complete", login_complete, methods=["POST"]),
+            Route("/session-check",  session_check),
             WebSocketRoute("/ws/extension", ws_extension),
-            # Mount MCP routes last so the WebSocket path takes precedence
+            # MCP routes last so specific paths above take precedence
             Route("/{path:path}", mcp_asgi, methods=["GET", "POST", "OPTIONS"]),
         ]
+    )
+
+    # Allow dashboard (localhost:5173) to call these endpoints cross-origin
+    return CORSMiddleware(
+        app,
+        allow_origins=["http://localhost:5173", "http://localhost:3000"],
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Content-Type", "Origin"],
     )
 
 
@@ -668,6 +752,7 @@ if __name__ == "__main__":
     logger.info(f"  MCP endpoint:        http://127.0.0.1:{SERVER_PORT}/")
     logger.info(f"  Extension WebSocket: ws://127.0.0.1:{SERVER_PORT}/ws/extension")
     logger.info(f"  Health check:        http://127.0.0.1:{SERVER_PORT}/health")
+    logger.info(f"  Login status:        http://127.0.0.1:{SERVER_PORT}/login-status")
 
     app = build_app()
     uvicorn.run(app, host="127.0.0.1", port=SERVER_PORT, log_level="info")

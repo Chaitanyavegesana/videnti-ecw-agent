@@ -163,8 +163,10 @@ async def test_extract_chart_data_caches_data(monkeypatch):
 
     # Verify an entry exists in the cache for this MRN
     assert "MRN-CACHE-TEST" in CHART_DATA_CACHE
-    # Cache now stores an encrypted token (str), not a raw dict
-    cached_token = CHART_DATA_CACHE["MRN-CACHE-TEST"]
+    # Cache now stores (encrypted_token, timestamp) tuples
+    cached_entry = CHART_DATA_CACHE["MRN-CACHE-TEST"]
+    assert isinstance(cached_entry, tuple) and len(cached_entry) == 2
+    cached_token, cached_ts = cached_entry
     assert isinstance(cached_token, str)
     assert len(cached_token) > 0
 
@@ -319,9 +321,11 @@ async def test_complete_rpa_flow_get_schedule_to_extract_data(monkeypatch):
     raw_data = extract_result["raw_data"]
     print(f"✓ Step 3: Extracted {len(raw_data)} clinical fields")
 
-    # STEP 4: Verify data is cached (as an encrypted token) and raw_data is valid
+    # STEP 4: Verify data is cached (as an encrypted token tuple) and raw_data is valid
     assert first_mrn in CHART_DATA_CACHE
-    cached_token = CHART_DATA_CACHE[first_mrn]
+    cached_entry = CHART_DATA_CACHE[first_mrn]
+    assert isinstance(cached_entry, tuple) and len(cached_entry) == 2
+    cached_token, _ = cached_entry
     assert isinstance(cached_token, str) and len(cached_token) > 0
     # Validate raw_data (returned in response) contains expected fields
     assert "demographics" in raw_data

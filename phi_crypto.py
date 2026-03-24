@@ -27,9 +27,21 @@ _FALLBACK_SALT = "videnti-local-dev-salt-do-not-use-in-prod"
 def _derive_key(salt: str = "") -> bytes:
     """
     Derives a 256-bit AES key from the local MRN salt in .env.
-    Falls back to a deterministic dev salt when ICS_MRN_SALT is unset.
+
+    When ``ICS_MRN_SALT`` is not set the module falls back to a well-known
+    development salt and emits a loud warning.  This allows tests and local
+    development to run without configuration, but makes it obvious that
+    production deployments must supply a real salt.
     """
-    raw_salt = salt or os.getenv("ICS_MRN_SALT", _FALLBACK_SALT)
+    raw_salt = salt or os.getenv("ICS_MRN_SALT", "")
+    if not raw_salt:
+        import warnings
+        warnings.warn(
+            "ICS_MRN_SALT is not set — using the insecure dev salt.  "
+            "Set ICS_MRN_SALT in your .env before deploying to production.",
+            stacklevel=3,
+        )
+        raw_salt = _FALLBACK_SALT
     return hashlib.sha256(raw_salt.encode()).digest()
 
 

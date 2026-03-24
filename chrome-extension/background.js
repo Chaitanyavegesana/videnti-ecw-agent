@@ -21,6 +21,8 @@
 const ICS_WS_URL = "ws://localhost:8001/ws/extension";
 const RECONNECT_DELAY_MS = 3000;
 const MAX_RECONNECT_ATTEMPTS = 10;
+const RECONNECT_BACKOFF_MULTIPLIER = 1.5;
+const PENDING_QUEUE_MAX = 50;
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -81,7 +83,7 @@ function scheduleReconnect() {
     return;
   }
   reconnectAttempts++;
-  const delay = RECONNECT_DELAY_MS * Math.pow(1.5, reconnectAttempts - 1);
+  const delay = RECONNECT_DELAY_MS * Math.pow(RECONNECT_BACKOFF_MULTIPLIER, reconnectAttempts - 1);
   console.log(`[Videnti] Reconnecting in ${Math.round(delay)}ms (attempt ${reconnectAttempts})`);
   setTimeout(connectWebSocket, delay);
 }
@@ -94,7 +96,14 @@ function sendToBackend(payload) {
   if (wsReady && ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(payload));
   } else {
-    pendingMessages.push(payload);
+    // Cap the pending queue to prevent unbounded memory growth
+    if (pendingMessages.length < PENDING_QUEUE_MAX) {
+      pendingMessages.push(payload);
+    } else {
+      console.warn("[Videnti] Pending queue full; dropping oldest message");
+      pendingMessages.shift();
+      pendingMessages.push(payload);
+    }
     connectWebSocket();  // Attempt (re)connect
   }
 }
